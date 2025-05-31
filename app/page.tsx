@@ -501,78 +501,90 @@ export default function VPNGateApp() {
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2">
-          <Shield className="w-8 h-8" />
-          VPN Gate Client
-        </h1>
-        <p className="text-muted-foreground mb-2">
-          Free VPN servers from VPN Gate. Connect directly or download .ovpn files for Android.
-        </p>
-        {/* Updated Author Section */}
-        <div className="text-sm text-muted-foreground mb-4 space-y-2">
-          <p>
-            Created by <span className="font-semibold text-primary">Suhail Akhtar</span>
-          </p>
-          <div className="flex items-center justify-center gap-4 text-xs">
+      <div className="mb-6">
+        {/* Main Title - Compact */}
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold flex items-center justify-center gap-2 mb-1">
+            <Shield className="w-6 h-6" />
+            VPN Gate Client
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Free VPN servers • Created by{" "}
             <a
               href="https://www.linkedin.com/in/im-suhail-akhtar"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
+              className="font-medium text-primary hover:underline"
             >
-              <ExternalLink className="w-3 h-3" />
-              LinkedIn
+              Suhail Akhtar
             </a>
-            <a
-              href="https://github.com/gitsambhal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              <ExternalLink className="w-3 h-3" />
-              GitHub
-            </a>
-          </div>
+          </p>
         </div>
 
-        {/* Cache Status */}
-        {cacheInfo && (
-          <div className="mb-4">
+        {/* Status Bar - Compact Info */}
+        <div className="flex items-center justify-center gap-4 mb-4 text-xs text-muted-foreground">
+          {cacheInfo && (
             <Badge variant={cacheInfo.hit ? "secondary" : "outline"} className="text-xs">
-              {cacheInfo.hit ? "📋 Cached Data" : "🔄 Fresh Data"} • Age: {formatCacheAge(cacheInfo.age)} • Expires in:{" "}
+              {cacheInfo.hit ? "📋" : "🔄"} {formatCacheAge(cacheInfo.age)} old • Expires{" "}
               {formatCacheAge(cacheInfo.ttl)}
             </Badge>
-          </div>
-        )}
+          )}
+          {servers.length > 0 && (
+            <span className="flex items-center gap-1">
+              <Server className="w-3 h-3" />
+              {filteredServers.length} of {totalServers} servers
+            </span>
+          )}
+          {favorites.size > 0 && (
+            <span className="flex items-center gap-1">
+              <Heart className="w-3 h-3 fill-red-500 text-red-500" />
+              {favorites.size} favorites
+            </span>
+          )}
+        </div>
 
-        <div className="flex gap-2 justify-center flex-wrap">
+        {/* Action Bar - Horizontal Layout */}
+        <div className="flex items-center justify-center gap-2 flex-wrap">
           <Button onClick={handleRefresh} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Force Refresh
+            <RefreshCw className="w-4 h-4 mr-1" />
+            Refresh
           </Button>
           <Button onClick={() => setShowFilters(!showFilters)} variant="outline" size="sm">
-            <Filter className="w-4 h-4 mr-2" />
+            <Filter className="w-4 h-4 mr-1" />
             Filters
+            {(filters.search ||
+              filters.country !== "all" ||
+              filters.logType !== "all" ||
+              filters.minSpeed > 0 ||
+              filters.maxPing < 1000) && (
+              <Badge variant="destructive" className="ml-1 h-4 w-4 p-0 text-xs">
+                !
+              </Badge>
+            )}
           </Button>
           <Button
             onClick={() => setFilters((prev) => ({ ...prev, showFavoritesOnly: !prev.showFavoritesOnly }))}
             variant={filters.showFavoritesOnly ? "default" : "outline"}
             size="sm"
           >
-            <Heart className={`w-4 h-4 mr-2 ${filters.showFavoritesOnly ? "fill-current" : ""}`} />
-            Favorites ({favorites.size})
+            <Heart className={`w-4 h-4 mr-1 ${filters.showFavoritesOnly ? "fill-current" : ""}`} />
+            Favorites
+            {favorites.size > 0 && (
+              <Badge variant={filters.showFavoritesOnly ? "secondary" : "default"} className="ml-1 h-4 w-4 p-0 text-xs">
+                {favorites.size}
+              </Badge>
+            )}
           </Button>
           <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Sort by..." />
+            <SelectTrigger className="w-32 h-8">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="score">Best Score</SelectItem>
-              <SelectItem value="speed">Fastest Speed</SelectItem>
-              <SelectItem value="ping">Lowest Ping</SelectItem>
-              <SelectItem value="uptime">Highest Uptime</SelectItem>
-              <SelectItem value="users">Fewest Users</SelectItem>
+              <SelectItem value="speed">Fastest</SelectItem>
+              <SelectItem value="ping">Low Ping</SelectItem>
+              <SelectItem value="uptime">Uptime</SelectItem>
+              <SelectItem value="users">Low Usage</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -687,18 +699,6 @@ export default function VPNGateApp() {
         </div>
       ) : (
         <>
-          <div className="mb-6 text-center space-y-2">
-            <Badge variant="secondary" className="text-sm">
-              {filteredServers.length} of {servers.length} servers shown
-              {filters.showFavoritesOnly && ` (${favorites.size} favorites)`}
-            </Badge>
-            {totalServers > servers.length && !filters.showFavoritesOnly && (
-              <div className="text-sm text-muted-foreground">
-                {totalServers - servers.length} more servers available
-              </div>
-            )}
-          </div>
-
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredServers.map((server, index) => {
               const quality = getQualityBadge(server)
