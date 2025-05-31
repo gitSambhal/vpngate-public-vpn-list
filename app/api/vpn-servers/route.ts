@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 
 // Cache configuration - 1 hour cache for VPN server data
 const CACHE_TTL = 60 * 60 * 1000 // 1 hour in milliseconds
-const CACHE_KEY = "vpn-servers-cache"
 
 // In-memory cache object
 const cache: {

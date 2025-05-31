@@ -16,6 +16,8 @@ import {
   Activity,
   Server,
   Wifi,
+  AlertTriangle,
+  Info,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -70,6 +72,7 @@ export default function VPNGateApp() {
   const [error, setError] = useState<string | null>(null)
   const [selectedServer, setSelectedServer] = useState<VPNServer | null>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [showUsagePolicy, setShowUsagePolicy] = useState(false)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [cacheInfo, setCacheInfo] = useState<CacheInfo | null>(null)
   const [filters, setFilters] = useState<Filters>({
@@ -503,15 +506,41 @@ export default function VPNGateApp() {
           <Shield className="w-8 h-8" />
           VPN Gate Client
         </h1>
-        <p className="text-muted-foreground mb-4">
+        <p className="text-muted-foreground mb-2">
           Free VPN servers from VPN Gate. Connect directly or download .ovpn files for Android.
         </p>
+        {/* Updated Author Section */}
+        <div className="text-sm text-muted-foreground mb-4 space-y-2">
+          <p>
+            Created by <span className="font-semibold text-primary">Suhail Akhtar</span>
+          </p>
+          <div className="flex items-center justify-center gap-4 text-xs">
+            <a
+              href="https://www.linkedin.com/in/im-suhail-akhtar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <ExternalLink className="w-3 h-3" />
+              LinkedIn
+            </a>
+            <a
+              href="https://github.com/gitsambhal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <ExternalLink className="w-3 h-3" />
+              GitHub
+            </a>
+          </div>
+        </div>
 
         {/* Cache Status */}
         {cacheInfo && (
           <div className="mb-4">
             <Badge variant={cacheInfo.hit ? "secondary" : "outline"} className="text-xs">
-              {cacheInfo.hit ? "📋 Cached" : "🔄 Fresh"} • Age: {formatCacheAge(cacheInfo.age)} • TTL:{" "}
+              {cacheInfo.hit ? "📋 Cached Data" : "🔄 Fresh Data"} • Age: {formatCacheAge(cacheInfo.age)} • Expires in:{" "}
               {formatCacheAge(cacheInfo.ttl)}
             </Badge>
           </div>
@@ -915,6 +944,117 @@ export default function VPNGateApp() {
         </Dialog>
       )}
 
+      {/* Usage Policy Dialog */}
+      <Dialog open={showUsagePolicy} onOpenChange={setShowUsagePolicy}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-600" />
+              Usage Policy & Disclaimers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+              <h3 className="font-semibold text-yellow-800 mb-2">⚠️ Important Disclaimers</h3>
+              <ul className="space-y-1 text-yellow-700">
+                <li>• This application is provided "as is" without any warranties</li>
+                <li>• No guarantee of service availability, speed, or reliability</li>
+                <li>• Use at your own risk and responsibility</li>
+                <li>• Creator is not liable for any damages or issues</li>
+              </ul>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-800 mb-2">🔒 Privacy & Security</h3>
+              <ul className="space-y-1 text-blue-700">
+                <li>• VPN servers are provided by VPN Gate volunteers</li>
+                <li>• Check each server's logging policy before connecting</li>
+                <li>• Your traffic may be logged by server operators</li>
+                <li>• Use HTTPS websites for additional security</li>
+                <li>• This app does not collect or store your personal data</li>
+              </ul>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+              <h3 className="font-semibold text-red-800 mb-2">⚖️ Legal Compliance</h3>
+              <ul className="space-y-1 text-red-700">
+                <li>• Ensure VPN usage is legal in your country</li>
+                <li>• Respect local laws and regulations</li>
+                <li>• Do not use for illegal activities</li>
+                <li>• Some countries restrict or ban VPN usage</li>
+                <li>• You are responsible for compliance with applicable laws</li>
+              </ul>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-800 mb-2">📋 VPN Gate Terms</h3>
+              <ul className="space-y-1 text-green-700">
+                <li>• Servers are provided by VPN Gate Academic Experiment Project</li>
+                <li>• Operated by University of Tsukuba, Japan</li>
+                <li>• Free service for academic research purposes</li>
+                <li>• Server availability and performance may vary</li>
+                <li>• Respect the VPN Gate terms of service</li>
+              </ul>
+            </div>
+
+            {/* Updated Technical Notes */}
+            <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-800 mb-2">🛠️ Technical Notes</h3>
+              <ul className="space-y-1 text-gray-700">
+                <li>• Data is cached on server for 1 hour to reduce API load</li>
+                <li>• Favorites are stored locally in your browser</li>
+                <li>• Requires OpenVPN Connect app for best experience</li>
+                <li>• Internet connection required to fetch server list</li>
+                <li>• Some servers may be offline or slow</li>
+                <li>• Performance depends on your location and server load</li>
+                <li>• Server-side API ensures reliable data fetching</li>
+              </ul>
+            </div>
+
+            {/* Updated About the Creator Section */}
+            <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+              <h3 className="font-semibold text-purple-800 mb-2">👨‍💻 About the Developer</h3>
+              <div className="text-purple-700 space-y-2">
+                <p>
+                  This application was created by <strong>Suhail Akhtar</strong>, a software developer passionate about
+                  creating useful tools and applications. This VPN Gate client provides a modern interface to access
+                  free VPN servers from the VPN Gate Academic Experiment Project.
+                </p>
+                <div className="flex items-center gap-4 text-sm pt-2">
+                  <a
+                    href="https://www.linkedin.com/in/im-suhail-akhtar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    LinkedIn Profile
+                  </a>
+                  <a
+                    href="https://github.com/gitsambhal"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-gray-700 hover:text-gray-900"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    GitHub Profile
+                  </a>
+                </div>
+                <p className="text-xs">
+                  This is an independent project and not officially affiliated with VPN Gate or University of Tsukuba.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <Button onClick={() => setShowUsagePolicy(false)} className="w-full">
+                I Understand and Agree
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* OpenVPN Help Dialog */}
       <Dialog open={showOpenVPNHelp} onOpenChange={setShowOpenVPNHelp}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -1032,7 +1172,15 @@ export default function VPNGateApp() {
         </DialogContent>
       </Dialog>
 
-      <div className="mt-12 text-center text-sm text-muted-foreground space-y-2">
+      {/* Updated Footer Section */}
+      <div className="mt-12 text-center text-sm text-muted-foreground space-y-4">
+        <div className="flex justify-center">
+          <Button onClick={() => setShowUsagePolicy(true)} variant="outline" size="sm">
+            <Info className="w-4 h-4 mr-2" />
+            Usage Policy & Disclaimers
+          </Button>
+        </div>
+
         <p>
           <strong>How to use:</strong>
         </p>
@@ -1053,7 +1201,8 @@ export default function VPNGateApp() {
               <br />• <strong>Quality Ratings:</strong> Excellent, Good, Fair, Poor based on performance
               <br />• <strong>Detailed Info:</strong> Speed, ping, uptime, traffic, operator details
               <br />• <strong>Smart Sorting:</strong> Favorites appear first, then by your chosen criteria
-              <br />• <strong>Smart Caching:</strong> Data cached for 5 minutes to reduce API calls
+              <br />• <strong>Server-side Caching:</strong> Data cached for 1 hour to reduce API calls
+              <br />• <strong>Reliable Fetching:</strong> Server-side API bypasses CORS restrictions
             </p>
           </div>
           <a
@@ -1065,6 +1214,41 @@ export default function VPNGateApp() {
             <ExternalLink className="w-4 h-4" />
             Download OpenVPN Connect from Google Play Store
           </a>
+        </div>
+
+        {/* Author Information */}
+        <div className="pt-6 border-t border-muted">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 p-4 rounded-lg max-w-2xl mx-auto">
+            <h3 className="font-semibold text-blue-800 mb-2">👨‍💻 About the Developer</h3>
+            <p className="text-blue-700 mb-3">
+              This VPN Gate client was developed by <strong>Suhail Akhtar</strong>, a passionate software developer
+              focused on creating useful tools and applications. This project provides a modern, user-friendly interface
+              to access VPN Gate's free VPN servers.
+            </p>
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <a
+                href="https://www.linkedin.com/in/im-suhail-akhtar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Connect on LinkedIn
+              </a>
+              <a
+                href="https://github.com/gitsambhal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View GitHub Profile
+              </a>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              ⭐ If you find this tool helpful, consider connecting or following for more projects!
+            </p>
+          </div>
         </div>
       </div>
     </div>
