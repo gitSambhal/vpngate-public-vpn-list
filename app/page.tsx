@@ -57,6 +57,13 @@ interface Filters {
   showFavoritesOnly: boolean
 }
 
+interface CacheInfo {
+  hit: boolean
+  age: number
+  ttl: number
+  lastFetch: number
+}
+
 export default function VPNGateApp() {
   const [servers, setServers] = useState<VPNServer[]>([])
   const [loading, setLoading] = useState(true)
@@ -64,6 +71,7 @@ export default function VPNGateApp() {
   const [selectedServer, setSelectedServer] = useState<VPNServer | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
+  const [cacheInfo, setCacheInfo] = useState<CacheInfo | null>(null)
   const [filters, setFilters] = useState<Filters>({
     search: "",
     country: "all",
@@ -125,7 +133,7 @@ export default function VPNGateApp() {
     return favorites.has(serverId)
   }
 
-  const fetchVPNServers = async (loadMore = false) => {
+  const fetchVPNServers = async (loadMore = false, forceRefresh = false) => {
     if (loadMore) {
       setLoadingMore(true)
     } else {
@@ -136,7 +144,8 @@ export default function VPNGateApp() {
 
     try {
       const offset = loadMore ? servers.length : 0
-      const response = await fetch(`/api/vpn-servers?limit=50&sortBy=${sortBy}&offset=${offset}`)
+      const refreshParam = forceRefresh ? "&refresh=true" : ""
+      const response = await fetch(`/api/vpn-servers?limit=50&sortBy=${sortBy}&offset=${offset}${refreshParam}`)
 
       if (!response.ok) {
         throw new Error("Failed to fetch VPN servers")
@@ -152,6 +161,15 @@ export default function VPNGateApp() {
 
       setHasMore(data.hasMore || false)
       setTotalServers(data.total || 0)
+      setCacheInfo(data.cache || null)
+
+      // Show cache status in toast for force refresh
+      if (forceRefresh) {
+        toast({
+          title: "Data Refreshed",
+          description: `Fetched fresh data from VPN Gate API. ${data.total} servers available.`,
+        })
+      }
     } catch (err) {
       setError("Failed to load VPN servers. Please try again.")
       console.error("Error fetching VPN servers:", err)
@@ -166,6 +184,10 @@ export default function VPNGateApp() {
     // Reset and fetch with new sorting
     setServers([])
     setHasMore(true)
+  }
+
+  const handleRefresh = () => {
+    fetchVPNServers(false, true) // Force refresh
   }
 
   useEffect(() => {
@@ -420,6 +442,14 @@ export default function VPNGateApp() {
     }
   }
 
+  const formatCacheAge = (seconds: number) => {
+    if (seconds < 60) return `${seconds}s`
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `${minutes}m`
+    const hours = Math.floor(minutes / 60)
+    return `${hours}h ${minutes % 60}m`
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto p-4 max-w-6xl">
@@ -456,7 +486,7 @@ export default function VPNGateApp() {
           <h1 className="text-3xl font-bold mb-2">VPN Gate Client</h1>
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-4">
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={fetchVPNServers} variant="outline">
+            <Button onClick={() => fetchVPNServers(false, true)} variant="outline">
               <RefreshCw className="w-4 h-4 mr-2" />
               Try Again
             </Button>
@@ -476,10 +506,21 @@ export default function VPNGateApp() {
         <p className="text-muted-foreground mb-4">
           Free VPN servers from VPN Gate. Connect directly or download .ovpn files for Android.
         </p>
+
+        {/* Cache Status */}
+        {cacheInfo && (
+          <div className="mb-4">
+            <Badge variant={cacheInfo.hit ? "secondary" : "outline"} className="text-xs">
+              {cacheInfo.hit ? "📋 Cached" : "🔄 Fresh"} • Age: {formatCacheAge(cacheInfo.age)} • TTL:{" "}
+              {formatCacheAge(cacheInfo.ttl)}
+            </Badge>
+          </div>
+        )}
+
         <div className="flex gap-2 justify-center flex-wrap">
-          <Button onClick={() => fetchVPNServers(false)} variant="outline" size="sm">
+          <Button onClick={handleRefresh} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+            Force Refresh
           </Button>
           <Button onClick={() => setShowFilters(!showFilters)} variant="outline" size="sm">
             <Filter className="w-4 h-4 mr-2" />
@@ -1012,6 +1053,7 @@ export default function VPNGateApp() {
               <br />• <strong>Quality Ratings:</strong> Excellent, Good, Fair, Poor based on performance
               <br />• <strong>Detailed Info:</strong> Speed, ping, uptime, traffic, operator details
               <br />• <strong>Smart Sorting:</strong> Favorites appear first, then by your chosen criteria
+              <br />• <strong>Smart Caching:</strong> Data cached for 5 minutes to reduce API calls
             </p>
           </div>
           <a
