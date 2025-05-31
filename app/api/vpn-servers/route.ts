@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
-// Cache configuration
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutes in milliseconds
+// Cache configuration - 1 hour cache for VPN server data
+const CACHE_TTL = 60 * 60 * 1000 // 1 hour in milliseconds
 const CACHE_KEY = "vpn-servers-cache"
 
 // In-memory cache object
@@ -104,7 +104,7 @@ function setCacheData(data: VPNServer[]): void {
   cache.data = data
   cache.timestamp = Date.now()
   cache.lastFetch = Date.now()
-  console.log(`Cached ${data.length} VPN servers`)
+  console.log(`Cached ${data.length} VPN servers for 1 hour`)
 }
 
 export async function GET(request: Request) {
@@ -180,6 +180,7 @@ export async function GET(request: Request) {
         age: Math.floor(cacheAge / 1000), // in seconds
         ttl: Math.floor(timeUntilExpiry / 1000), // in seconds
         lastFetch: cache.lastFetch,
+        duration: "1 hour", // Human readable cache duration
       },
     })
 
@@ -187,6 +188,7 @@ export async function GET(request: Request) {
     response.headers.set("Cache-Control", `public, max-age=${Math.floor(timeUntilExpiry / 1000)}`)
     response.headers.set("X-Cache", isCacheValid() ? "HIT" : "MISS")
     response.headers.set("X-Cache-Age", Math.floor(cacheAge / 1000).toString())
+    response.headers.set("X-Cache-Duration", "3600") // 1 hour in seconds
 
     return response
   } catch (error) {
@@ -198,6 +200,7 @@ export async function GET(request: Request) {
         cache: {
           available: cache.data !== null,
           age: cache.data ? Math.floor((Date.now() - cache.timestamp) / 1000) : 0,
+          duration: "1 hour",
         },
       },
       { status: 500 },
