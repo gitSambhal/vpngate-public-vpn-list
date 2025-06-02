@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "VPN Gate Client - Free VPN Servers | OpenVPN Profiles Download",
@@ -160,7 +161,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://www.vpngate.net" />
         <link rel="dns-prefetch" href="https://www.vpngate.net" />
       </head>
-      <body>{children}</body>
+      <body>{children}
+        <Analytics />
+      </body>
     </html>
   )
 }
